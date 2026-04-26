@@ -146,24 +146,21 @@ def build_manager_router(ctx: AppContext) -> Router:
         except ValueError:
             await callback.answer(CB_INVALID_ACTION)
             return
-        present = await ctx.db.get_present_by_id(present_id)
-        if not present:
-            await callback.answer(CB_NOT_FOUND)
-            return
-
         if action == "approve":
-            manager_topic_id = (
-                present.get("topic_id") or callback.message.message_thread_id
+            result, present = await ctx.db.moderate_present_if_status(
+                present_id,
+                status="approved",
+                expected_status="pending_review",
+                event_type="present_approved",
             )
-            changed = await ctx.db.set_present_result_if_status(
-                present_id, "approved", "pending_review"
-            )
-            if not changed:
+            if result == "not_found":
+                await callback.answer(CB_NOT_FOUND)
+                return
+            if result != "ok":
                 await callback.answer(MANAGER_CB_ALREADY_PROCESSED)
                 return
-            await ctx.db.set_user_state(present["user_id"], "idle")
-            await ctx.db.add_event(
-                present["user_id"], "present_approved", {"present_id": present_id}
+            manager_topic_id = (
+                present.get("topic_id") or callback.message.message_thread_id
             )
             await _safe_clear_inline_keyboard(callback, "approve")
             await safe_telegram_call(
@@ -192,18 +189,20 @@ def build_manager_router(ctx: AppContext) -> Router:
             return
 
         if action == "reject":
-            manager_topic_id = (
-                present.get("topic_id") or callback.message.message_thread_id
+            result, present = await ctx.db.moderate_present_if_status(
+                present_id,
+                status="rejected",
+                expected_status="pending_review",
+                event_type="present_rejected",
             )
-            changed = await ctx.db.set_present_result_if_status(
-                present_id, "rejected", "pending_review"
-            )
-            if not changed:
+            if result == "not_found":
+                await callback.answer(CB_NOT_FOUND)
+                return
+            if result != "ok":
                 await callback.answer(MANAGER_CB_ALREADY_PROCESSED)
                 return
-            await ctx.db.set_user_state(present["user_id"], "idle")
-            await ctx.db.add_event(
-                present["user_id"], "present_rejected", {"present_id": present_id}
+            manager_topic_id = (
+                present.get("topic_id") or callback.message.message_thread_id
             )
             await _safe_clear_inline_keyboard(callback, "reject")
             await safe_telegram_call(

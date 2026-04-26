@@ -250,12 +250,11 @@ async def _handle_present_waiting_screenshot_message(ctx: AppContext, message: M
         await message.answer(REVIEW_SEND_RETRY)
         return
 
-    await ctx.db.set_present_pending_review(present["id"], file_id, topic.message_thread_id)
-    await ctx.db.set_user_state(message.from_user.id, "idle")
-    await ctx.db.add_event(
-        message.from_user.id,
-        "review_screenshot_sent",
-        {"present_id": present["id"], "topic_id": topic.message_thread_id},
+    await ctx.db.set_present_pending_review_and_finalize(
+        user_id=message.from_user.id,
+        present_id=present["id"],
+        screenshot_file_id=file_id,
+        topic_id=topic.message_thread_id,
     )
     await message.answer(
         REVIEW_SENT_THANKS,
