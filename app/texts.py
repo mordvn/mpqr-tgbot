@@ -97,6 +97,9 @@ REVIEW_SENT_THANKS = (
     "⚪️ Супер, спасибо!\n\n"
     "Скоро мы все проверим. Ответ поступит в этот бот — не останавливайте его"
 )
+REVIEW_SEND_RETRY = (
+    "Не удалось передать отзыв менеджеру. Попробуй отправить скриншот еще раз чуть позже."
+)
 USE_START_HINT = "Используй /start для главного меню."
 
 # Manager flow messages
@@ -105,6 +108,7 @@ MANAGER_CB_ALREADY_SENT = "Запрос уже отправлялся"
 MANAGER_CB_SENT_TO_CLIENT = "Клиенту отправлен запрос на отзыв"
 MANAGER_CB_DONE = "Готово, клиент уведомлен"
 MANAGER_CB_REJECTED = "Отклонено"
+MANAGER_CB_ALREADY_PROCESSED = "Заявка уже обработана"
 MANAGER_APPROVED_TOPIC = "Бот уведомил клиента о поступлении подарка, спасибо"
 MANAGER_REJECTED_TOPIC = (
     "Отзыв отклонен. Клиент уведомлен и может отправить /review повторно."

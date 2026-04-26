@@ -320,6 +320,21 @@ class DB:
             )
             await conn.commit()
 
+    async def set_present_result_if_status(
+        self, present_id: int, status: str, expected_status: str
+    ) -> bool:
+        async with aiosqlite.connect(self.path) as conn:
+            cursor = await conn.execute(
+                """
+                UPDATE presents
+                SET status = ?, updated_at = ?
+                WHERE id = ? AND status = ?
+                """,
+                (status, now_iso(), present_id, expected_status),
+            )
+            await conn.commit()
+            return cursor.rowcount > 0
+
     async def add_message_link(self, user_id: int, topic_id: int, manager_message_id: int) -> None:
         async with aiosqlite.connect(self.path) as conn:
             await conn.execute(

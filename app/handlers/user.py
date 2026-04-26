@@ -51,6 +51,7 @@ from app.texts import (
     REVIEW_PRESENT_TEXT,
     REVIEW_SCREENSHOT_PROMPT,
     REVIEW_SCREENSHOT_REQUIRED,
+    REVIEW_SEND_RETRY,
     REVIEW_SENT_THANKS,
     REVIEW_TOPIC_CAPTION,
     REVIEW_TOPIC_CREATE_ERROR,
@@ -82,7 +83,11 @@ def _extract_phone_callback_action(callback_data: str) -> tuple[str, int] | None
     parts = callback_data.split(":")
     if len(parts) != 3:
         return None
-    return parts[1], int(parts[2])
+    try:
+        present_id = int(parts[2])
+    except ValueError:
+        return None
+    return parts[1], present_id
 
 
 def _extract_support_category(widget_id: str) -> str:
@@ -215,19 +220,12 @@ async def _handle_present_waiting_screenshot_message(ctx: AppContext, message: M
         logger.exception("Cannot create review topic for user_id={}", message.from_user.id)
         await message.answer(REVIEW_TOPIC_CREATE_ERROR)
         return
-    await ctx.db.set_present_pending_review(present["id"], file_id, topic.message_thread_id)
-    await ctx.db.set_user_state(message.from_user.id, "idle")
-    await ctx.db.add_event(
-        message.from_user.id,
-        "review_screenshot_sent",
-        {"present_id": present["id"], "topic_id": topic.message_thread_id},
-    )
     caption = REVIEW_TOPIC_CAPTION.format(
         user_name=user_name,
         phone=present.get("phone") or PHONE_NOT_SPECIFIED,
     )
     if media_kind == "photo":
-        await safe_telegram_call(
+        sent = await safe_telegram_call(
             "user.send_review_photo_to_manager",
             lambda: ctx.bot.send_photo(
                 chat_id=ctx.settings.managers_group_id,
@@ -238,7 +236,7 @@ async def _handle_present_waiting_screenshot_message(ctx: AppContext, message: M
             ),
         )
     else:
-        await safe_telegram_call(
+        sent = await safe_telegram_call(
             "user.send_review_document_to_manager",
             lambda: ctx.bot.send_document(
                 chat_id=ctx.settings.managers_group_id,
@@ -248,6 +246,17 @@ async def _handle_present_waiting_screenshot_message(ctx: AppContext, message: M
                 reply_markup=review_moderation_inline(present["id"]),
             ),
         )
+    if sent is None:
+        await message.answer(REVIEW_SEND_RETRY)
+        return
+
+    await ctx.db.set_present_pending_review(present["id"], file_id, topic.message_thread_id)
+    await ctx.db.set_user_state(message.from_user.id, "idle")
+    await ctx.db.add_event(
+        message.from_user.id,
+        "review_screenshot_sent",
+        {"present_id": present["id"], "topic_id": topic.message_thread_id},
+    )
     await message.answer(
         REVIEW_SENT_THANKS,
         reply_markup=ReplyKeyboardRemove(),
