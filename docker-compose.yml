@@ -1,0 +1,12 @@
+services:
+  bot:
+    build:
+      context: .
+      args:
+        PYTHON_VERSION: "3.13"
+    container_name: mpqr-tgbot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

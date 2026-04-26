@@ -1,0 +1,30 @@
+# Data files
+data/
+*.sqlite3
+*.db
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv
+
+# Environment variables
+.env
+.env.*
+!.env.examples
+
+# macOS / IDE
+.DS_Store
+.idea/
+.vscode/
