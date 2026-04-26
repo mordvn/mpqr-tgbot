@@ -4,11 +4,11 @@
   <img src="./media/icon.gif" width="220" alt="MPQR Bot Icon">
 </p>
 
-Минималистичный Telegram-бот для:
+A minimalist Telegram bot for:
 
-- поддержки клиентов в topic-based менеджерской группе;
-- запроса и валидации отзыва;
-- выдачи подарка после проверки менеджером.
+- customer support in a topic-based manager group;
+- review request and validation flow;
+- reward delivery after manager approval.
 
 ## Stack
 
@@ -20,57 +20,57 @@
 - `loguru`
 - Docker / Docker Compose
 
-## Основной флоу
+## Core Flow
 
-- `/start` -> главное меню (`Получить подарок` / `Написать продавцу`)
-- Поддержка:
-  - выбор категории;
-  - сообщения клиента попадают в менеджерский topic;
-  - ответы менеджера доставляются клиенту;
-  - менеджер может нажать `Решено, запросить отзыв`.
-- Отзыв и подарок:
-  - запрос номера телефона (ввод или share contact);
-  - подтверждение номера;
-  - отправка скриншота отзыва;
-  - менеджер `Бонус отправлен` / `Отклонить`;
-  - клиент получает итоговый статус.
+- `/start` -> main menu (`Получить подарок` / `Написать продавцу`)
+- Support flow:
+  - category selection;
+  - user messages are forwarded into a manager topic;
+  - manager replies are relayed back to the user;
+  - manager can click `Решено, запросить отзыв`.
+- Review & reward flow:
+  - phone request (text input or `share contact`);
+  - phone confirmation;
+  - review screenshot upload;
+  - manager actions: `Бонус отправлен` / `Отклонить`;
+  - user receives final status.
 
-## Команды
+## Commands
 
 - `/start` — главное меню
-- `/help` — сразу в поддержку
-- `/review` — сразу в подарок за отзыв
+- `/help` — прямой вход в поддержку
+- `/review` — прямой вход в reward-for-review flow
 
-## Быстрый старт (локально)
+## Quick Start (Local)
 
 ```bash
 cp .env.examples .env
-# заполни .env
+# fill .env
 uv sync
 uv run -m app.main
 ```
 
-## Запуск через Docker
+## Run with Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-## Конфиг (`.env`)
+## Config (`.env`)
 
-Обязательные переменные:
+Required variables:
 
 - `TG_BOT_TOKEN`
-- `MANAGERS_GROUP_ID` (forum supergroup, обычно `-100...`)
+- `MANAGERS_GROUP_ID` (forum supergroup, usually `-100...`)
 
-Дополнительно:
+Optional:
 
 - `BOT_USERNAME`
 - `SQLITE_PATH`
 - `LOG_LEVEL`
 - `TZ`
 
-## Структура проекта
+## Project Structure
 
 ```text
 app/
@@ -88,12 +88,12 @@ app/
     manager.py
 ```
 
-## Надежность
+## Reliability
 
-- state и бизнес-этапы сохраняются в SQLite;
-- отправки в Telegram обернуты safe-wrapper с retry для временных network/flood ошибок;
-- обработаны сценарии blocked user / bad request без падения всего процесса.
+- state and business milestones are persisted in SQLite;
+- Telegram API calls are wrapped with a safe-wrapper + retry for temporary network/flood issues;
+- blocked user / bad request scenarios are handled without crashing the whole process.
 
-## Лицензия
+## License
 
-Проект распространяется по лицензии [GNU AGPL-3.0](./LICENSE).
+This project is licensed under [GNU AGPL-3.0](./LICENSE).
