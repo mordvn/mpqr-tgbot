@@ -35,6 +35,20 @@ A minimalist Telegram bot for:
   - manager actions: `Бонус отправлен` / `Отклонить`;
   - user receives final status.
 
+## Demo
+
+Client (user) chat:
+
+<p>
+  <img src="./media/client.png" width="520" alt="Client demo screenshot">
+</p>
+
+Manager (topics) chat:
+
+<p>
+  <img src="./media/manager.png" width="520" alt="Manager demo screenshot">
+</p>
+
 ## Commands
 
 - `/start` — главное меню
