@@ -24,6 +24,8 @@ from app.texts import (
 )
 
 
+# ===== Internal parsing / UI helpers =====
+
 async def _safe_clear_inline_keyboard(callback: CallbackQuery, log_hint: str) -> None:
     try:
         await callback.message.edit_reply_markup(reply_markup=None)
@@ -37,6 +39,8 @@ def _extract_manager_action(callback_data: str) -> tuple[str, str] | None:
         return None
     return parts[1], parts[2]
 
+
+# ===== Internal support/review flow helpers =====
 
 async def _notify_client_after_support_resolved(
     ctx: AppContext,
@@ -87,9 +91,12 @@ async def _resolve_user_id_for_manager_reply(
     return await ctx.db.get_user_by_topic(topic_id)
 
 
+# ===== Router factory =====
+
 def build_manager_router(ctx: AppContext) -> Router:
     router = Router()
 
+    # Inline callbacks from manager-side buttons in forum topics.
     @router.callback_query(F.data.startswith("mgr:"))
     async def manager_callbacks(callback: CallbackQuery) -> None:
         if callback.message.chat.id != ctx.settings.managers_group_id:
@@ -232,6 +239,7 @@ def build_manager_router(ctx: AppContext) -> Router:
 
         await callback.answer(CB_UNKNOWN_COMMAND)
 
+    # Free-form manager replies in topic chats are mirrored back to the user.
     @router.message(lambda m: m.chat.id == ctx.settings.managers_group_id)
     async def manager_topic_messages(message: Message) -> None:
         if not message.from_user or message.from_user.is_bot:

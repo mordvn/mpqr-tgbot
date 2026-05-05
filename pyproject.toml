@@ -1,5 +1,5 @@
 [project]
-name = "mpqr-tgbot"
+name = "mp-qrtgbot"
 version = "0.1.0"
 description = "Telegram feedback bot MVP"
 requires-python = ">=3.13,<3.15"

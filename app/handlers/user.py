@@ -66,6 +66,8 @@ from app.texts import (
 from app.validators import normalize_phone
 
 
+# ===== Internal parsing / UI helpers =====
+
 async def _hide_reply_keyboard_silent(message: Message) -> None:
     # Telegram reply keyboard is sticky; remove it silently.
     cleanup_message = await safe_telegram_call(
@@ -110,6 +112,8 @@ def _extract_image_file_id(message: Message) -> tuple[str | None, str | None]:
         return message.document.file_id, "document"
     return None, None
 
+
+# ===== Internal present/support state handlers =====
 
 async def _handle_phone_ok_callback(
     ctx: AppContext,
@@ -262,6 +266,8 @@ async def _handle_present_waiting_screenshot_message(ctx: AppContext, message: M
     )
 
 
+# ===== Dialog builders =====
+
 def build_user_dialog(ctx: AppContext) -> Dialog:
     async def on_go_present(
         callback: CallbackQuery, _: Button, manager: DialogManager
@@ -331,6 +337,8 @@ def build_user_dialog(ctx: AppContext) -> Dialog:
     )
 
 
+# ===== Public flow helpers =====
+
 async def ensure_support_topic_and_open(
     ctx: AppContext, user_id: int, category: str
 ) -> int:
@@ -384,9 +392,12 @@ async def start_present_flow(
     )
 
 
+# ===== Router factory =====
+
 def build_user_router(ctx: AppContext) -> Router:
     router = Router()
 
+    # Entry points from Telegram commands.
     @router.message(Command(CMD_START))
     async def cmd_start(message: Message, dialog_manager: DialogManager) -> None:
         if message.chat.type != "private":
@@ -423,6 +434,7 @@ def build_user_router(ctx: AppContext) -> Router:
             intro_text=REVIEW_PRESENT_TEXT,
         )
 
+    # Inline callbacks inside present flow.
     @router.callback_query(F.data.startswith("usr:phone_"))
     async def user_phone_callbacks(callback: CallbackQuery) -> None:
         if callback.message.chat.type != "private":
@@ -448,6 +460,7 @@ def build_user_router(ctx: AppContext) -> Router:
 
         await callback.answer(CB_UNKNOWN_COMMAND)
 
+    # Shortcut button from "present already received" notice to support category picker.
     @router.callback_query(F.data == "usr:open_help")
     async def open_help_from_inline(
         callback: CallbackQuery, dialog_manager: DialogManager
@@ -462,6 +475,7 @@ def build_user_router(ctx: AppContext) -> Router:
             show_mode=ShowMode.EDIT,
         )
 
+    # Main private-chat dispatcher for non-command user messages.
     @router.message(F.chat.type == "private")
     async def private_user_messages(message: Message) -> None:
         if not message.from_user or message.from_user.is_bot:
