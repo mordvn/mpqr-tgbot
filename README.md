@@ -1,4 +1,4 @@
-# MPQR Telegram Bot
+# MP QR Telegram Bot
 
 <p>
   <img src="./media/icon.gif" width="220" alt="MPQR Bot Icon">
