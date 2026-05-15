@@ -79,7 +79,6 @@ Required variables:
 
 Optional:
 
-- `BOT_USERNAME`
 - `SQLITE_PATH`
 - `LOG_LEVEL`
 - `TZ`
